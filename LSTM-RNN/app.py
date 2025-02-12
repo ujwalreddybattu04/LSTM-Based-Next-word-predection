@@ -7,7 +7,6 @@ import requests
 from googletrans import Translator
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
-from pydub import AudioSegment
 
 # Load the trained LSTM model and tokenizer
 model = load_model('next_word_lstm.h5')
@@ -45,26 +44,19 @@ def get_word_definition(word):
         return definition
     return "Definition not found."
 
-# Function to capture voice input from an uploaded file
+# Function to capture voice input
 def get_speech_input():
-    uploaded_file = st.file_uploader("Upload an audio file for speech recognition", type=["wav", "mp3"])
-    if uploaded_file is not None:
-        audio_path = "temp_audio.wav"
-        audio = AudioSegment.from_file(uploaded_file)
-        audio.export(audio_path, format="wav")
-
-        recognizer = sr.Recognizer()
-        with sr.AudioFile(audio_path) as source:
-            st.write("🔊 Processing audio...")
-            audio_data = recognizer.record(source)
-        try:
-            text = recognizer.recognize_google(audio_data)
-            return text
-        except sr.UnknownValueError:
-            return "Could not understand the speech."
-        except sr.RequestError:
-            return "Speech service unavailable."
-    return None
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        st.write("🎤 Listening... Speak now...")
+        audio = recognizer.listen(source)
+    try:
+        text = recognizer.recognize_google(audio)
+        return text
+    except sr.UnknownValueError:
+        return "Could not understand the speech."
+    except sr.RequestError:
+        return "Speech service unavailable."
 
 # Function to speak out text
 def speak_text(text):
@@ -95,12 +87,12 @@ if dark_mode:
 
 st.title("🔮 Next Word Prediction with LSTM")
 
-# Speech-to-Text via Upload
-st.subheader("🎤 Upload Audio for Speech Recognition")
-spoken_text = get_speech_input()
-if spoken_text:
-    st.session_state["text_input"] = spoken_text
-    st.rerun()
+# Speech-to-Text Button
+if st.button("🎙️ Use Voice Input"):
+    spoken_text = get_speech_input()
+    if spoken_text:
+        st.session_state["text_input"] = spoken_text
+        st.rerun()
 
 # Text Input Field
 input_text = st.text_input("✍️ Enter a sequence of words:", key="text_input")
