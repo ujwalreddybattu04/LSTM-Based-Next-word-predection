@@ -7,3 +7,6 @@ matplotlib
 streamlit
 scikeras
 nltk
+speechrecognition
+pyaudio
+nltk
