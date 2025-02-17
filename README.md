@@ -67,4 +67,5 @@ Googletrans
 Requests
 Numpy
 Pickle
+I got an accuracy of 83.5
 
